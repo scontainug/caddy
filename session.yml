@@ -1,0 +1,12 @@
+name: "caddy"
+version: "0.3"
+security:
+  attestation:
+    mode: none
+
+services:
+    - name: binaryfs
+      command: caddy file-server --domain localhost
+      environment:
+        SCONE_LOG: "error"
+        HOME: "/root"

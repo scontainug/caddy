@@ -1,0 +1,28 @@
+services:
+  cas:
+    image: registry.scontain.com/sconecuratedimages/services:cas.preprovisioned
+    devices:
+      - /dev/sgx_enclave
+    expose:
+      - 18765
+      - 8081
+  cli:
+    image: registry.scontain.com/sconecuratedimages/sconecli:alpine
+    volumes:
+    - ./:/test:ro
+    depends_on:
+      cas:
+        condition: service_healthy
+    command: scone session create -c cas --only_for_testing-disable-attestation-verification /test/session.yml
+  test:
+    image: caddy
+    devices:
+      - /dev/sgx_enclave
+    command: /test/run_test.sh
+    volumes:
+    - ./:/test:ro
+    depends_on:
+      cas:
+        condition: service_healthy
+      cli:
+        condition: service_completed_successfully
