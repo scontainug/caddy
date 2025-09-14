@@ -1,34 +1,53 @@
 # Confidential `caddy`
 
-This repository contains a simple example of how to use the `golang` images that we maintain on <https://github.com/scontain/golang/pkgs/container/golang> to build Go applications that link with `glibc` or `musl` instead of calling Linux system calls directly. This requires a minor patch of the `golang` runtime.
+This repository demonstrates how to transform the [Caddy](https://caddyserver.com) web
+server into a confidential application that runs inside a hardware-protected enclave.
+It relies on [golang images](https://github.com/scontain/golang/pkgs/container/golang)
+maintained by SCONE in which the Go runtime links against `glibc` or `musl` instead of
+invoking Linux system calls directly. These patched images are rebuilt daily from the
+official upstream images on Docker Hub.
 
-The upstream `golang` images are automatically transformed on a daily basis: We run our CI pipeline once per day to transform the upstream `golang` images on docker hub (<https://hub.docker.com/_/golang>) to the `golang` images that use `glibc` or `musl` to issue system calls.
+## Prerequisites
 
-## `caddy`
+To build and run the confidential version of Caddy you need:
 
-`caddy` is a popular `Go` application. We show how to transform `caddy` into a confidential application, i.e., it runs inside of an **enclave**. When we talk about **enclaves**, this does run on Intel SGX as well as AMD SEV SNP, Intel TDX, and in future, ARM CCA.
+- Docker and Docker Compose
+- Access to the images on `registry.scontain.com/scone.cloud` and
+  `registry.scontain.com/sconecuratedimages`
+- Optional tools such as `wrk` for benchmarking
 
-## Background
+## Usage
 
-This repository contains a simple example of how to use the the `golang` images that we maintain on `ghcr.io` to build a confidential Go application. These `golang` images are slightly patched in the sense that the `Go` runtime uses `glibc` or `musl` to isse system calls. In this way, we can intercept system calls more efficiently: we use this,e.g., to transparently attest applications, encrypt / decrypt files and network traffic.
+Build the container image and start the confidential Caddy server:
 
-Note: You need access to images on `registry.scontain.com/scone.cloud` and `registry.scontain.com/sconecuratedimages` to be able to build and run `caddy` confidential.
+```bash
+./build_and_run.sh
+```
 
-## Organization
+The script produces both a native and a confidential binary, embeds static content in
+the enclave, and launches the service with `docker compose`.
 
-1. `build_and_run.sh`: creates the container image `caddy` and then runs the confidential `caddy` using `docker compose` using file `docker-compose.yaml`.
+Inside the running container you can execute:
 
-2. Image `caddy` is built using `Dockerfile`: it contains two versions of `caddy`: 
-   - a native version built with the help of the `golang` image
-   - a confidential version created by transforming the native binary with the help of `scone-signer` 
-   - we embed in the confidential version the files that are served by `caddy` to protect the integrity of the served files.
+```bash
+./run_test.sh
+```
 
-3. Within container `caddy` we run script `run_test.sh` to benchmark `confidential caddy`. Note that this is only used for performance benchmarking. For production usage, one needs to extend the CAS policy.
+to benchmark the native and confidential variants and verify TLS functionality. For
+production deployments the sample CAS policy in the script must be extended.
+
+## Repository layout
+
+- `Dockerfile` – builds native and confidential binaries
+- `build_and_run.sh` – builds the image and starts the service with `docker compose`
+- `run_test.sh` – benchmarking and functional test script
+- `docs/demo.svg` – screencast of `build_and_run.sh`
 
 ## Screencast
 
-The screencast shows an execution of `build_and_run.sh`:
+The following screencast demonstrates `build_and_run.sh` in action:
 
 ![demo](docs/demo.svg)
 
-You can create a new screencast by executing `make`.
+Generate an updated screencast by executing `make`.
+
