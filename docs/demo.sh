@@ -41,4 +41,4 @@ pe './build_and_run.sh'
 pe '# DONE'
 
 # Done
-sleep 0.5
+sleep 10

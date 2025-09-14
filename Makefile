@@ -8,6 +8,7 @@ CAST              ?= docs/demo.cast
 CAST_V2           ?= docs/demo.v2.cast
 SVG               ?= docs/demo.svg
 TITLE             ?= Confidential Caddy demo
+COLS              ?= 100
 
 DEPS := asciinema svg-term
 
@@ -25,7 +26,7 @@ all: record svg
 $(CAST): $(SCRIPT) | check-deps
 	@echo "$(YELLOW)Recording to $(CAST)…$(RESET)"
 	@TYPE_SPEED=$(TYPE_SPEED) PAUSE_AFTER_CMD=$(PAUSE_AFTER_CMD) \
-	asciinema rec -q -t "$(TITLE)" -c "$(SCRIPT)" $@
+	asciinema rec --overwrite -q -t "$(TITLE)" -c "$(SCRIPT)" $@
 	@echo "$(GREEN)✓ Recorded: $(CAST)$(RESET)"
 
 # -----------------------------
@@ -33,6 +34,7 @@ $(CAST): $(SCRIPT) | check-deps
 # If v3 -> convert to v2; if v1/v2 -> copy through.
 # -----------------------------
 # Ensure v2 for svg-term (auto-detect reliably; convert v3→v2)
+# Not yet enabled since still usig v2
 $(CAST_V2): $(CAST) | check-deps
 	echo "$(YELLOW)Converting to v2 → $(CAST_V2)…$(RESET)"; \
 	asciinema convert -f v2 "$(CAST)" "$(CAST_V2)"; \
@@ -43,7 +45,7 @@ $(CAST_V2): $(CAST) | check-deps
 # -----------------------------
 $(SVG): check-deps
 	@echo "$(YELLOW)Exporting SVG to $(SVG)…$(RESET)"
-	@cat "$(CAST)" | svg-term --out "$(SVG)" --window --no-cursor
+	@cat "$(CAST)" | svg-term --out "$(SVG)" --window --no-cursor  --width $(COLS)
 	@echo "$(GREEN)✓ SVG created: $(SVG)$(RESET)"
 
 # Front-door targets, matching your original names
