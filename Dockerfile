@@ -1,7 +1,7 @@
 ARG SCONE_VERSION=6.0.2
 FROM registry.scontain.com/scone.cloud/scone-alpine-pkgs:${SCONE_VERSION} AS packages
 
-FROM alpine:3.20 AS builder-wrk
+FROM alpine:3.22 AS builder-wrk
     # build wrk2 load generator - had issues on newer alpine versions ; we stick with alpine 3.20 for now
 RUN apk add gcc musl-dev make git openssl-dev  zlib-dev && \
     cd / && git clone --depth 1 https://github.com/giltene/wrk2.git && \
