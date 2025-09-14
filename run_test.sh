@@ -63,4 +63,5 @@ while kill -0 $CADDY_PID 2>/dev/null; do
     fi
 done
 
+cat /tmp/caddy.log
 grep '"msg":"shutdown complete","signal":"SIGTERM","exit_code":0' /tmp/caddy.log
